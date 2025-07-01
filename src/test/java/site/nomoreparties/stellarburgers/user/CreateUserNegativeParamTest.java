@@ -1,6 +1,7 @@
 package site.nomoreparties.stellarburgers.user;
 
 import io.restassured.response.Response;
+import io.qameta.allure.Step;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,24 +33,35 @@ public class CreateUserNegativeParamTest {
     @Parameterized.Parameters(name = "email: {0}, password: {1}, name: {2}")
     public static Collection<Object[]> getTestData() {
         return Arrays.asList(new Object[][]{
-                {null, "password123", "TestUser"},       // отсутствует email
-                {"user@yandex.ru", null, "TestUser"},     // отсутствует password
-                {"user@yandex.ru", "password123", null}   // отсутствует name
+                {null, "password123", "TestUser"},
+                {"user@yandex.ru", null, "TestUser"},
+                {"user@yandex.ru", "password123", null}
         });
     }
 
     @Test
     public void userCreationWithMissingFieldShouldReturnError() {
-        User user = new User(email, password, name);
+        User user = createUserWithData(email, password, name);
 
         Response response = userClient.createUser(user);
 
+        checkMissingFieldError(response);
+    }
+
+    @Step("Создание пользователя с email: {0}, password: {1}, name: {2}")
+    private User createUserWithData(String email, String password, String name) {
+        return new User(email, password, name);
+    }
+
+    @Step("Проверка, что возвращена ошибка о недостающих полях")
+    private void checkMissingFieldError(Response response) {
         response.then()
                 .statusCode(403)
                 .body("message", equalTo("Email, password and name are required fields"));
     }
 
     @After
+    @Step("Удаление пользователя после теста (если создан)")
     public void tearDown() {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);

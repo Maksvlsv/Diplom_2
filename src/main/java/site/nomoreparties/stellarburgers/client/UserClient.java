@@ -27,4 +27,13 @@ public class UserClient {
                 .body(user)
                 .post();
     }
+
+    public Response loginUser(User user) {
+        return given()
+                .baseUri(BASE_URI)
+                .basePath(BASE_PATH + "/login")
+                .header("Content-type", "application/json")
+                .body(user)
+                .post();
+    }
 }

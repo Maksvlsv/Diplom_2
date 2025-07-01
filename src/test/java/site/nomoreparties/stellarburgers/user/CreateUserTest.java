@@ -48,7 +48,7 @@ public class CreateUserTest {
         }
     }
 
-    // ===== Allure Steps =====
+
 
     @Step("Генерация уникального пользователя")
     private User generateRandomUser() {
