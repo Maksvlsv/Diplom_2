@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.is;
 public class CreateUserTest {
 
     private final UserClient userClient = new UserClient();
+    private String accessToken;
 
     @Test
     public void userCanBeCreated() {
@@ -22,23 +23,30 @@ public class CreateUserTest {
         Response response = userClient.createUser(user);
 
         checkUserCreated(response);
+
+        accessToken = response.then().extract().path("accessToken");
     }
 
     @Test
     public void createDuplicateUserReturnsError() {
         User user = generateRandomUser();
 
-        // Первый раз создаём пользователя
         Response firstResponse = userClient.createUser(user);
         checkUserCreated(firstResponse);
 
-        // Второй раз — тот же пользователь
         Response secondResponse = userClient.createUser(user);
         checkDuplicateUserError(secondResponse);
+
+        accessToken = firstResponse.then().extract().path("accessToken");
     }
 
-
-
+    @After
+    @Step("Удаление пользователя после теста (если он был создан)")
+    public void tearDown() {
+        if (accessToken != null) {
+            userClient.deleteUser(accessToken);
+        }
+    }
 
     // ===== Allure Steps =====
 
