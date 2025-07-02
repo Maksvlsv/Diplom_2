@@ -1,6 +1,5 @@
 package site.nomoreparties.stellarburgers.client;
 
-import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import site.nomoreparties.stellarburgers.model.Order;
 
@@ -8,28 +7,32 @@ import static io.restassured.RestAssured.given;
 
 public class OrderClient {
 
+    private static final String BASE_URI = "https://stellarburgers.nomoreparties.site";
     private static final String BASE_PATH = "/api/orders";
 
-    @Step("Создание заказа с токеном: {token}")
-    public Response createOrder(Order order, String token) {
-        if (token != null) {
+    public Response createOrder(Order order, String accessToken) {
+        if (accessToken != null) {
             return given()
-                    .header("Authorization", token)
+                    .baseUri(BASE_URI)
+                    .basePath(BASE_PATH)
+                    .header("Authorization", accessToken)
                     .header("Content-type", "application/json")
                     .body(order)
-                    .when()
-                    .post(BASE_PATH);
+                    .post();
         } else {
-            return createOrderWithoutToken(order);
+            return given()
+                    .baseUri(BASE_URI)
+                    .basePath(BASE_PATH)
+                    .header("Content-type", "application/json")
+                    .body(order)
+                    .post();
         }
     }
 
-    @Step("Создание заказа без токена")
-    public Response createOrderWithoutToken(Order order) {
+    public Response getAvailableIngredients() {
         return given()
-                .header("Content-type", "application/json")
-                .body(order)
-                .when()
-                .post(BASE_PATH);
+                .baseUri(BASE_URI)
+                .basePath("/api/ingredients")
+                .get();
     }
 }

@@ -21,4 +21,11 @@ public class User {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public static User getRandom() {
+        String email = "user" + System.currentTimeMillis() + "@yandex.ru";
+        String password = "password123";
+        String name = "User" + System.currentTimeMillis();
+        return new User(email, password, name);
+    }
 }
