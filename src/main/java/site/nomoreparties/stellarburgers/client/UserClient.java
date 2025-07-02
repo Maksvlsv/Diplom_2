@@ -36,4 +36,18 @@ public class UserClient {
                 .body(user)
                 .post();
     }
+
+    public Response updateUser(String accessToken, User updatedUser) {
+        var request = given()
+                .baseUri(BASE_URI)
+                .basePath("/api/auth/user")
+                .header("Content-type", "application/json")
+                .body(updatedUser);
+
+        if (accessToken != null) {
+            request.header("Authorization", accessToken);
+        }
+
+        return request.patch();
+    }
 }
