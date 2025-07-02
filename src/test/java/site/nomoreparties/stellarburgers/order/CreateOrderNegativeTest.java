@@ -14,9 +14,8 @@ import site.nomoreparties.stellarburgers.model.UserCredentials;
 import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
-public class CreateOrderTest {
+public class CreateOrderNegativeTest {
 
     private final UserClient userClient = new UserClient();
     private final OrderClient orderClient = new OrderClient();
@@ -30,33 +29,6 @@ public class CreateOrderTest {
         accessToken = loginUser(new UserCredentials(user.getEmail(), user.getPassword()));
     }
 
-
-    @Test
-    public void userCanCreateOrderWithAuthAndIngredients() {
-        List<String> ingredients = getValidIngredients();
-        Order order = new Order(ingredients);
-
-        Response response = createOrderWithToken(order, accessToken);
-
-        response.then()
-                .statusCode(200)
-                .body("success", equalTo(true))
-                .body("order.number", notNullValue());
-    }
-
-    @Test
-    public void userCanCreateOrderWithoutAuth() {
-        List<String> ingredients = getValidIngredients();
-        Order order = new Order(ingredients);
-
-        Response response = createOrderWithoutToken(order);
-
-        response.then()
-                .statusCode(200)
-                .body("success", equalTo(true))
-                .body("order.number", notNullValue());
-    }
-
     @After
     public void tearDown() {
         if (accessToken != null) {
@@ -64,13 +36,25 @@ public class CreateOrderTest {
         }
     }
 
-    @Step("Получение валидных ингредиентов из API")
-    private List<String> getValidIngredients() {
-        return orderClient.getAvailableIngredients()
-                .then()
-                .statusCode(200)
-                .extract()
-                .path("data._id");
+    @Test
+    public void userCannotCreateOrderWithoutIngredients() {
+        Order order = new Order(List.of());
+
+        Response response = orderClient.createOrder(order, accessToken);
+
+        response.then()
+                .statusCode(400)
+                .body("message", equalTo("Ingredient ids must be provided"));
+    }
+
+    @Test
+    public void userCannotCreateOrderWithInvalidIngredientHash() {
+        Order order = new Order(List.of("invalid_ingredient_hash"));
+
+        Response response = orderClient.createOrder(order, accessToken);
+
+        response.then()
+                .statusCode(500);
     }
 
     @Step("Создание пользователя через API")
@@ -89,15 +73,5 @@ public class CreateOrderTest {
                 .statusCode(200)
                 .extract()
                 .path("accessToken");
-    }
-
-    @Step("Создание заказа с авторизацией")
-    private Response createOrderWithToken(Order order, String token) {
-        return orderClient.createOrder(order, token);
-    }
-
-    @Step("Создание заказа без авторизации")
-    private Response createOrderWithoutToken(Order order) {
-        return orderClient.createOrder(order, null);
     }
 }

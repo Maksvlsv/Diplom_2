@@ -35,4 +35,12 @@ public class OrderClient {
                 .basePath("/api/ingredients")
                 .get();
     }
+
+    public Response getOrders(String token) {
+        return given()
+                .baseUri(BASE_URI)
+                .basePath("/api/orders")
+                .header("Authorization", token)
+                .get();
+    }
 }
