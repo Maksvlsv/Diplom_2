@@ -41,13 +41,11 @@ public class CreateUserTest {
     }
 
     @After
-    @Step("Удаление пользователя после теста (если он был создан)")
     public void tearDown() {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);
         }
     }
-
 
 
     @Step("Генерация уникального пользователя")

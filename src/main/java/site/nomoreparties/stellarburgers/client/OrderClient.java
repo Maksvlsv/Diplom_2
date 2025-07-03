@@ -1,5 +1,6 @@
 package site.nomoreparties.stellarburgers.client;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.response.Response;
 import site.nomoreparties.stellarburgers.model.Order;
 
@@ -13,6 +14,7 @@ public class OrderClient {
     public Response createOrder(Order order, String accessToken) {
         if (accessToken != null) {
             return given()
+                    .filter(new AllureRestAssured())
                     .baseUri(BASE_URI)
                     .basePath(BASE_PATH)
                     .header("Authorization", accessToken)
@@ -21,6 +23,7 @@ public class OrderClient {
                     .post();
         } else {
             return given()
+                    .filter(new AllureRestAssured())
                     .baseUri(BASE_URI)
                     .basePath(BASE_PATH)
                     .header("Content-type", "application/json")
@@ -31,16 +34,22 @@ public class OrderClient {
 
     public Response getAvailableIngredients() {
         return given()
+                .filter(new AllureRestAssured())
                 .baseUri(BASE_URI)
                 .basePath("/api/ingredients")
                 .get();
     }
 
     public Response getOrders(String token) {
-        return given()
+        var request = given()
+                .filter(new AllureRestAssured())
                 .baseUri(BASE_URI)
-                .basePath("/api/orders")
-                .header("Authorization", token)
-                .get();
+                .basePath("/api/orders");
+
+        if (token != null) {
+            request.header("Authorization", token);
+        }
+
+        return request.get();
     }
 }

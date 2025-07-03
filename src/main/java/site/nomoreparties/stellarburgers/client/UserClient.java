@@ -1,5 +1,6 @@
 package site.nomoreparties.stellarburgers.client;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.response.Response;
 import site.nomoreparties.stellarburgers.model.User;
 import site.nomoreparties.stellarburgers.model.UserCredentials;
@@ -13,6 +14,7 @@ public class UserClient {
 
     public Response deleteUser(String accessToken) {
         return given()
+                .filter(new AllureRestAssured())
                 .baseUri(BASE_URI)
                 .header("Authorization", accessToken)
                 .when()
@@ -21,6 +23,7 @@ public class UserClient {
 
     public Response createUser(User user) {
         return given()
+                .filter(new AllureRestAssured())
                 .baseUri(BASE_URI)
                 .basePath("/api/auth/register")
                 .header("Content-type", "application/json")
@@ -28,13 +31,13 @@ public class UserClient {
                 .post();
     }
 
-    // Новый метод: create() — обёртка над createUser
     public Response create(User user) {
         return createUser(user);
     }
 
     public Response loginUser(User user) {
         return given()
+                .filter(new AllureRestAssured())
                 .baseUri(BASE_URI)
                 .basePath(BASE_PATH + "/login")
                 .header("Content-type", "application/json")
@@ -42,7 +45,6 @@ public class UserClient {
                 .post();
     }
 
-    // Новый метод: login() с использованием UserCredentials
     public Response login(UserCredentials credentials) {
         User user = new User(credentials.getEmail(), credentials.getPassword(), null);
         return loginUser(user);
@@ -50,6 +52,7 @@ public class UserClient {
 
     public Response updateUser(String accessToken, User updatedUser) {
         var request = given()
+                .filter(new AllureRestAssured())
                 .baseUri(BASE_URI)
                 .basePath("/api/auth/user")
                 .header("Content-type", "application/json")

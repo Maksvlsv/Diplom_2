@@ -48,6 +48,13 @@ public class CreateUserNegativeParamTest {
         checkMissingFieldError(response);
     }
 
+    @After
+    public void tearDown() {
+        if (accessToken != null) {
+            userClient.deleteUser(accessToken);
+        }
+    }
+
     @Step("Создание пользователя с email: {0}, password: {1}, name: {2}")
     private User createUserWithData(String email, String password, String name) {
         return new User(email, password, name);
@@ -58,13 +65,5 @@ public class CreateUserNegativeParamTest {
         response.then()
                 .statusCode(403)
                 .body("message", equalTo("Email, password and name are required fields"));
-    }
-
-    @After
-    @Step("Удаление пользователя после теста (если создан)")
-    public void tearDown() {
-        if (accessToken != null) {
-            userClient.deleteUser(accessToken);
-        }
     }
 }

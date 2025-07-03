@@ -29,12 +29,6 @@ public class CreateOrderNegativeTest {
         accessToken = loginUser(new UserCredentials(user.getEmail(), user.getPassword()));
     }
 
-    @After
-    public void tearDown() {
-        if (accessToken != null) {
-            userClient.deleteUser(accessToken);
-        }
-    }
 
     @Test
     public void userCannotCreateOrderWithoutIngredients() {
@@ -55,6 +49,13 @@ public class CreateOrderNegativeTest {
 
         response.then()
                 .statusCode(500);
+    }
+
+    @After
+    public void tearDown() {
+        if (accessToken != null) {
+            userClient.deleteUser(accessToken);
+        }
     }
 
     @Step("Создание пользователя через API")

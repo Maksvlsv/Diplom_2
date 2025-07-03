@@ -13,10 +13,9 @@ import site.nomoreparties.stellarburgers.model.UserCredentials;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
-public class CreateOrderTest {
+public class GetOrdersTest {
 
     private final UserClient userClient = new UserClient();
     private final OrderClient orderClient = new OrderClient();
@@ -28,32 +27,26 @@ public class CreateOrderTest {
         user = User.getRandom();
         createUser(user);
         accessToken = loginUser(new UserCredentials(user.getEmail(), user.getPassword()));
+        createOrderForUser(accessToken);
     }
 
     @Test
-    public void userCanCreateOrderWithAuthAndIngredients() {
-        List<String> ingredients = getValidIngredients();
-        Order order = new Order(ingredients);
-
-        Response response = createOrderWithToken(order, accessToken);
+    public void authorizedUserCanGetOrders() {
+        Response response = orderClient.getOrders(accessToken);
 
         response.then()
                 .statusCode(200)
                 .body("success", equalTo(true))
-                .body("order.number", notNullValue());
+                .body("orders", not(empty()));
     }
 
     @Test
-    public void userCanCreateOrderWithoutAuth() {
-        List<String> ingredients = getValidIngredients();
-        Order order = new Order(ingredients);
-
-        Response response = createOrderWithoutToken(order);
+    public void unauthorizedUserCannotGetOrders() {
+        Response response = orderClient.getOrders(null);
 
         response.then()
-                .statusCode(200)
-                .body("success", equalTo(true))
-                .body("order.number", notNullValue());
+                .statusCode(401)
+                .body("message", equalTo("You should be authorised"));
     }
 
     @After
@@ -63,16 +56,8 @@ public class CreateOrderTest {
         }
     }
 
-    @Step("Получение валидных ингредиентов из API")
-    private List<String> getValidIngredients() {
-        return orderClient.getAvailableIngredients()
-                .then()
-                .statusCode(200)
-                .extract()
-                .path("data._id");
-    }
 
-    @Step("Создание пользователя через API")
+    @Step("Создание пользователя")
     private void createUser(User user) {
         userClient.createUser(user)
                 .then()
@@ -90,13 +75,18 @@ public class CreateOrderTest {
                 .path("accessToken");
     }
 
-    @Step("Создание заказа с авторизацией")
-    private Response createOrderWithToken(Order order, String token) {
-        return orderClient.createOrder(order, token);
-    }
+    @Step("Создание хотя бы одного заказа")
+    private void createOrderForUser(String token) {
+        List<String> ingredients = orderClient.getAvailableIngredients()
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("data._id");
 
-    @Step("Создание заказа без авторизации")
-    private Response createOrderWithoutToken(Order order) {
-        return orderClient.createOrder(order, null);
+        Order order = new Order(ingredients);
+
+        orderClient.createOrder(order, token)
+                .then()
+                .statusCode(200);
     }
 }

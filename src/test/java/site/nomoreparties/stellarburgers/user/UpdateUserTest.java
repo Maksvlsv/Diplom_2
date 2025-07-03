@@ -36,7 +36,6 @@ public class UpdateUserTest {
     }
 
     @After
-    @Step("Удаление пользователя после теста")
     public void tearDown() {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);

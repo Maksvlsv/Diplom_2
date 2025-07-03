@@ -49,13 +49,11 @@ public class LoginUserTest {
     }
 
     @After
-    @Step("Удаление пользователя после тестов")
     public void tearDown() {
         if (accessToken != null) {
             userClient.deleteUser(accessToken);
         }
     }
-
 
 
     @Step("Генерация нового пользователя")
