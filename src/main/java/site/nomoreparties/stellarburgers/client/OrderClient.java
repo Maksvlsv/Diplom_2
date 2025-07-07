@@ -1,0 +1,55 @@
+package site.nomoreparties.stellarburgers.client;
+
+import io.qameta.allure.restassured.AllureRestAssured;
+import io.restassured.response.Response;
+import site.nomoreparties.stellarburgers.model.Order;
+
+import static io.restassured.RestAssured.given;
+
+public class OrderClient {
+
+    private static final String BASE_URI = "https://stellarburgers.nomoreparties.site";
+    private static final String BASE_PATH = "/api/orders";
+
+    public Response createOrder(Order order, String accessToken) {
+        if (accessToken != null) {
+            return given()
+                    .filter(new AllureRestAssured())
+                    .baseUri(BASE_URI)
+                    .basePath(BASE_PATH)
+                    .header("Authorization", accessToken)
+                    .header("Content-type", "application/json")
+                    .body(order)
+                    .post();
+        } else {
+            return given()
+                    .filter(new AllureRestAssured())
+                    .baseUri(BASE_URI)
+                    .basePath(BASE_PATH)
+                    .header("Content-type", "application/json")
+                    .body(order)
+                    .post();
+        }
+    }
+
+    public Response getAvailableIngredients() {
+        return given()
+                .filter(new AllureRestAssured())
+                .baseUri(BASE_URI)
+                .basePath("/api/ingredients")
+                .get();
+    }
+
+    public Response getOrders(String token) {
+        var request = given()
+                .filter(new AllureRestAssured())
+                .baseUri(BASE_URI)
+                .basePath("/api/orders");
+
+        if (token != null) {
+            request.header("Authorization", token);
+        }
+
+        return request.get();
+    }
+}
